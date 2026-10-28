@@ -39,11 +39,6 @@ See [docs/research-questions.md](docs/research-questions.md).
 Douglas Niyonsingiza: accountant (government and nonprofit), MS in Information Technology.
 ORCID: [0009-0000-1094-9269](https://orcid.org/0009-0000-1094-9269)
 
-## Use of AI tools
-
-This project uses AI assistants (such as Claude) for drafting, code suggestions and
-literature search. The author directs the work, reviews and tests all code, and is
-responsible for every result reported here.
 
 ## License
 
