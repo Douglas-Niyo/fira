@@ -1,0 +1,5 @@
+User_ID,User_Name,Role
+U01,Clerk-Treasurer,clerk
+U02,Deputy Clerk,clerk
+U03,Mayor,approver
+U04,Council Treasurer,approver

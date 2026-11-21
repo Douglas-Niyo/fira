@@ -1,0 +1,48 @@
+scheme_id,type,table,record_id,note
+S001,T01,Invoices_Received,INV000568,duplicate of INV000465
+S001,T01,Payments_Made,PAY000568,
+S002,T01,Invoices_Received,INV000569,duplicate of INV000423
+S002,T01,Payments_Made,PAY000569,
+S003,T01,Invoices_Received,INV000570,duplicate of INV000468
+S003,T01,Payments_Made,PAY000570,
+S004,T02,Invoices_Received,INV000571,near-duplicate of INV000199
+S004,T02,Payments_Made,PAY000571,
+S005,T02,Invoices_Received,INV000572,near-duplicate of INV000535
+S005,T02,Payments_Made,PAY000572,
+S006,T02,Invoices_Received,INV000573,near-duplicate of INV000466
+S006,T02,Payments_Made,PAY000573,
+S007,T04,Payments_Made,PAY000574,second payment of INV000357
+S008,T04,Payments_Made,PAY000575,second payment of INV000149
+S009,T05,FIRA_Supplier_Change_Log,SUP000021@2025-11-17,
+S009,T05,Invoices_Received,INV000574,
+S009,T05,Payments_Made,PAY000576,
+S010,T05,FIRA_Supplier_Change_Log,SUP000038@2025-08-12,
+S010,T05,Invoices_Received,INV000575,
+S010,T05,Payments_Made,PAY000577,
+S011,T06,Supplier_Listing,SUP000061,fictitious supplier
+S011,T06,Invoices_Received,INV000576,
+S011,T06,Payments_Made,PAY000578,
+S011,T06,Invoices_Received,INV000577,
+S011,T06,Payments_Made,PAY000579,
+S011,T06,Invoices_Received,INV000578,
+S011,T06,Payments_Made,PAY000580,
+S011,T06,Invoices_Received,INV000579,
+S011,T06,Payments_Made,PAY000581,
+S011,T06,Invoices_Received,INV000580,
+S011,T06,Payments_Made,PAY000582,
+S011,T06,Invoices_Received,INV000581,
+S011,T06,Payments_Made,PAY000583,
+S012,T09,Invoices_Received,INV000582,
+S012,T09,Payments_Made,PAY000584,
+S012,T09,Invoices_Received,INV000583,
+S012,T09,Payments_Made,PAY000585,
+S012,T09,Invoices_Received,INV000584,
+S012,T09,Payments_Made,PAY000586,
+S013,T09,Invoices_Received,INV000585,
+S013,T09,Payments_Made,PAY000587,
+S013,T09,Invoices_Received,INV000586,
+S013,T09,Payments_Made,PAY000588,
+S013,T09,Invoices_Received,INV000587,
+S013,T09,Payments_Made,PAY000589,
+S014,T15,Payments_Made,PAY000590,"payment to inactive supplier, no invoice"
+S015,T15,Payments_Made,PAY000591,"payment to inactive supplier, no invoice"
