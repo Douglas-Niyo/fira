@@ -8,6 +8,7 @@ from sklearn.ensemble import IsolationForest
 from scipy.stats import wilcoxon
 from .monthly import monthly,contract,I,P,S,A,C
 from .generator import Config,Generator
+from .ranking import family, order, relative_features
 
 DEV={0,1,2,3,4,7,8,11,42}
 SIZES=(600,3000,12000)
@@ -28,13 +29,14 @@ def fsr(n,f,budget):
     caps=np.minimum(vals,hi)
     return float(np.mean(np.minimum([f.get(key,0) for key in n],caps)/caps))
 
-def scores(pay,month):
+def scores(pay,month,relative=True):
     df=pay[pay.Payment_Date.str[:7]<=month].copy()
     if df.empty:return {}
     hist=df.Payment_Date.str[:7]<month; cur=~hist
     if not cur.any() or hist.sum()<20:return {}
     x=np.column_stack([np.log1p(df.Payment_Amount_Local),pd.to_datetime(df.Payment_Date).dt.dayofweek,
                        (df.Entered_By==df.Approved_By).astype(int),(df.Payment_Type=="ACH").astype(int)])
+    if relative:x=np.column_stack([x,relative_features(df)])
     train=x[hist];test=x[cur]
     clf=IsolationForest(n_estimators=64,max_samples=min(256,len(train)),random_state=117,n_jobs=1).fit(train)
     # Two outlier scores combined as empirical percentiles against past payments.
@@ -68,30 +70,32 @@ def one(seed,size,p,enriched,stress):
             exact[r.destination].add((r.table,r.record_id))
             exact_amount[r.destination]=max(exact_amount.get(r.destination,0),float(a.loc[a.alert_id==r.alert_id,"amount"].iloc[0]))
     appl=t[A].merge(t[P][["Payment_ID","Payment_Date"]],on="Payment_ID")
-    candidates=[]; scores_by_dest={}
+    candidates=[]; families={}; models={True:{},False:{}}
     for m in months:
-        sc=scores(t[P],m); inv_sc=appl.loc[appl.AP_Application_Date.str[:7]<=m].assign(score=lambda d:d.Payment_ID.map(sc)).groupby("Invoice_ID").score.max().dropna().to_dict()
-        for r in items[items.month==m].itertuples():candidates.append((m,r.item_id,2*r.tier,float(r.largest_amount) if pd.notna(r.largest_amount) else 0))
-        for r in summary[summary.month==m].itertuples():candidates.append((m,f"summary:{m}:{r.user}",3,float(r.payments_dollars+r.invoices_dollars)))
-        for mm,d,_,_ in candidates:
-            if m==mm:scores_by_dest[d]=max([sc.get(r,0) if tb==P else inv_sc.get(r,0) if tb==I else 0 for tb,r in recs[d]] or [0])
+        for r in items[items.month==m].itertuples():
+            candidates.append((m,r.item_id,2*r.tier,float(r.largest_amount) if pd.notna(r.largest_amount) else 0))
+            families[r.item_id]=family(set(r.rules.split(",")))
+        for r in summary[summary.month==m].itertuples():
+            candidates.append((m,f"summary:{m}:{r.user}",6,float(r.payments_dollars+r.invoices_dollars)))
+        for relative,dest_scores in models.items():
+            sc=scores(t[P],m,relative)
+            inv_sc=appl.loc[appl.AP_Application_Date.str[:7]<=m].assign(score=lambda d:d.Payment_ID.map(sc)).groupby("Invoice_ID").score.max().dropna().to_dict()
+            for mm,d,_,_ in candidates:
+                if m==mm:dest_scores[d]=max([sc.get(r,0) if tb==P else inv_sc.get(r,0) if tb==I else 0 for tb,r in recs[d]] or [0])
     found_pack=set().union(*(truth[r] for dest,group in recs.items() if not dest.startswith("summary:") for r in group))
     raw=len(a); lines=len(candidates);paycount=len(valid[P]);out=[]
     base=dict(seed=seed,size=size,family="enriched" if enriched else "prevalence",target=0 if enriched else p,stress=stress,invoices=len(valid[I]),payments=paycount,
               realized=len(set(lab.loc[lab.table==P,"record_id"]))/max(1,paycount),schemes=len(typed),raw=raw,lines=lines,
               reduction=1-lines/raw if raw else None,pack_retention=len(found_pack)==len(typed),trace=set(a.alert_id)==set(links.alert_id))
+    base["full_found_by_type"]=json.dumps({t:sum(typed[j]==t for j in found_pack) for t in sorted(n)})
     for k in (5,10,20):
         pressure=sum(sum(mm==m for mm,*_ in candidates)>k for m in months)/12
-        for method in ("B0","B1","B2","B3"):
+        for method in ("B0","B1","B2","B3","B3_min","B4"):
             rr=exact if method=="B0" else recs
             selected=[]
             for m in months:
-                pool=[v for v in candidates if v[0]==m and (method!="B0" or v[1] in exact)]
-                def rank(v):
-                    _,d,tier,amt=v
-                    if method=="B0":amt=exact_amount[d]
-                    return (tier if method in ("B1","B3") else 0,-scores_by_dest[d] if method in ("B2","B3") else 0,-amt,d)
-                selected+=sorted(pool,key=rank)[:k]
+                pool=[v for v in candidates if v[0]==m]
+                selected+=order(pool,method,k,models[method!="B3_min"],families,exact_amount)
             hits=[set() if v[1].startswith("summary:") else set().union(*(truth[r] for r in rr[v[1]])) for v in selected]
             found=set().union(*hits);f=pd.Series([typed[j] for j in found],dtype=str).value_counts().to_dict()
             paid_ids={r for v in selected if not v[1].startswith("summary:") for tb,r in rr[v[1]] if tb==P and truth[tb,r]}
@@ -99,7 +103,7 @@ def one(seed,size,p,enriched,stress):
             first={}
             for v,h in zip(selected,hits):
                 for j in h:first.setdefault(typed[j],v[0])
-            out.append(dict(**base,k=k,method=method,pressure=pressure,reviewed=len(selected),fsr=fsr(n,f,12*k),
+            out.append(dict(**base,k=k,method=method,pressure=pressure,tier1_fills_months=sum(sum(v[0]==m and v[2]==2 for v in candidates)>=k for m in months),tier1_read=sum(v[2]==2 for v in selected),tier2_read=sum(v[2]==4 for v in selected),summaries_read=sum(v[2]==6 for v in selected),available_summaries=len(summary),reviewed=len(selected),fsr=fsr(n,f,12*k),
                  coverage=len(f)/len(n) if n else None,recall=len(found)/len(typed) if typed else None,
                  precision=sum(bool(h) for h in hits)/len(hits) if hits else None,found_by_type=json.dumps(f),present_by_type=json.dumps(n),first_hit=json.dumps(first),linked_planted_payment_dollars=round(dollars,2)))
     return out
@@ -118,20 +122,29 @@ def main():
     out=Path(args.out);out.mkdir(parents=True,exist_ok=False)
     if args.formal:
         git=lambda *x:subprocess.check_output(["git",*x],text=True).strip()
-        if git("rev-parse","HEAD")!=git("rev-parse","FIRA-eval-freeze^{commit}") or git("status","--porcelain","--untracked-files=no") or not Path("docs/evaluation-v0.4.md").read_text().startswith("# FROZEN"):
+        if git("rev-parse","HEAD")!=git("rev-parse","FIRA-eval-freeze^{commit}") or git("status","--porcelain","--untracked-files=no") or not Path("docs/evaluation-v0.5.md").read_text().startswith("# FROZEN"):
             raise SystemExit("Use a clean author-approved frozen commit and tag, per README.")
         cases=list(jobs())
-    else:cases=[(42,600,0,True,False),(7,600,.001,False,False)]
+    else:cases=[(42,600,0,True,False),(7,600,.001,False,False),(8,3000,.005,False,True),(11,12000,.005,False,True)]
     rows=[]
     for case in cases:
         subset=one(*case); rows+=subset
         pd.DataFrame(subset).to_csv(out/f"seed-{case[0]}.csv",index=False)
     df=pd.DataFrame(rows);df.to_csv(out/"all.csv",index=False)
+    paired_results(df).to_csv(out/"paired.csv",index=False)
+
+def paired_results(df):
     result=[]
     for keys,g in df[df.k==10].groupby(["size","family","target"]):
         for metric in ["fsr","coverage"]:
-            v=g.pivot(index="seed",columns="method",values=metric); d=(v.B3-v.B1).dropna().to_numpy()
-            rng=np.random.default_rng(2301);ci=np.quantile(rng.choice(d,(2000,len(d))).mean(1),[.025,.975]) if len(d) else [None,None]
-            result.append(dict(size=keys[0],family=keys[1],target=keys[2],metric=metric,n=len(d),pressure=g.pressure.mean(),delta=d.mean() if len(d) else None,lo=ci[0],hi=ci[1],p=wilcoxon(d).pvalue if len(d) and np.any(d) else None))
-    pd.DataFrame(result).to_csv(out/"paired.csv",index=False)
+            v=g.pivot(index="seed",columns="method",values=metric)
+            for left,right in (("B3","B1"),("B4","B1"),("B3","B4"),("B3","B3_min")):
+                d=(v[left]-v[right]).dropna().to_numpy(dtype=float)
+                rng=np.random.default_rng(2301)
+                ci=np.quantile(rng.choice(d,(2000,len(d))).mean(1),[.025,.975]) if len(d)>1 else [None,None]
+                result.append(dict(size=keys[0],family=keys[1],target=keys[2],metric=metric,
+                    comparison=left+" minus "+right,n=len(d),pressure=g.pressure.mean(),
+                    delta=d.mean() if len(d) else None,lo=ci[0],hi=ci[1],
+                    p=wilcoxon(d).pvalue if len(d)>1 and np.any(d) else None))
+    return pd.DataFrame(result)
 if __name__=="__main__":main()

@@ -1,5 +1,5 @@
 # FIRA | monthly payment review
-Development release 0.2.0 • synthetic accounts payable • Douglas Niyonsingiza
+Development release 0.2.0, benchmark protocol v0.5 draft • synthetic accounts payable • Douglas Niyonsingiza
 
 FIRA gives an independent reviewer at a small local government a short monthly list of payments and invoices to check, with explanations and access to supporting records. The reviewer investigates and documents the outcome. A flag is not a finding of wrongdoing. Nonprofit recipients of federal funds are a second intended population; this release does not establish that the method works for them.
 
@@ -16,13 +16,14 @@ python -m fira.generator --seed 42 --out reproduced/data
 python -m fira.review --data reproduced/data --out reproduced/pack
 python -m fira.benchmark --out reproduced/benchmark-development
 ```
-Choose a new output folder for each benchmark. Development mode exercises two configurations; its enriched seed 42 plants one of each type and is distinct from the 15-scheme example. Running the generator and review commands with the default configuration reproduces the demonstration. Compare CSV outputs; the data-card creation timestamp is intentionally variable.
+Choose a new output folder for each benchmark. Development mode exercises four known configurations; its enriched seed 42 plants one of each type and is distinct from the 15-scheme example. Running the generator and review commands with the default configuration reproduces the demonstration. Compare CSV outputs; the data-card creation timestamp is intentionally variable.
 
 ## Files
 - `examples/corrected/`: all twelve months, raw alerts, summary and detail rows, record links and an invoice-source-row map. Context-only alerts remain searchable even when they do not receive a top-level line.
 - `docs/schema-v0.1.md`: current supported subset and limitations (legacy filename). No production imports or real confidential records.
-- `docs/evaluation-v0.4.md`: current protocol awaiting author approval. The older draft is historical.
-- `examples/development-benchmark/`: development-only results, never evidence from a frozen experiment.
+- `docs/evaluation-v0.5.md`: current protocol awaiting author approval. The older draft is historical.
+- [v0.5 development comparison](examples/protocol-v0.5-development/comparison.md): revised queue, supplier features and ranking tradeoffs.
+- `examples/development-benchmark/`: archived v0.4 development-only results, never evidence from a frozen experiment.
 - `docs/review-protocol-v0.1.md`: independent reviewer duties and the proposed human study.
 
 ## Formal benchmark (after public protocol freeze only)

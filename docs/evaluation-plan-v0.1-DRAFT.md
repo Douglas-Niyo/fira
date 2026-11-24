@@ -1,4 +1,4 @@
-> Historical plan v0.3. See evaluation-v0.4.md for current implementation and decisions awaiting sign-off. Historical counts below are not results for this release.
+> Historical plan v0.3. See evaluation-v0.5.md for current implementation and decisions awaiting sign-off. Historical counts below are not results for this release.
 
 # FIRA evaluation plan, v0.3 — DRAFT, not yet frozen (November 21, 2026)
 

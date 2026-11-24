@@ -1,3 +1,5 @@
+> Historical draft used for development release 0.2.0. The current draft is [v0.5](evaluation-v0.5.md).
+
 # DRAFT — evaluation protocol v0.4 for author review
 
 This draft controls fira/benchmark.py. It changes parts of v0.3 deliberately. No formal evaluation cases have been run. The three choices needing specific author review are: count each self-approval summary as one slot, restrict B1–B3 to the same candidate population, and designate the large 0.5% cell as the primary comparison. Record agreement or revisions before freezing; do not backdate.
