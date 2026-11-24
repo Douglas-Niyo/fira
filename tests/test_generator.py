@@ -45,6 +45,28 @@ class TestGenerator(unittest.TestCase):
         share = (lab.table == "Payments_Made").sum() / len(self.t["Payments_Made"])
         self.assertLess(share, 0.05)
 
+    def test_ids_do_not_reveal_planted_records(self):
+        """Planted records must not cluster at the end of the ID or check-number sequence."""
+        lab = self.t["labels"]
+        pay = self.t["Payments_Made"].reset_index(drop=True)
+        planted = pay.Payment_ID.isin(lab[lab.table == "Payments_Made"].record_id)
+        # mean position of planted payments should not sit in the last tenth of the file
+        self.assertLess(planted[planted].index.to_series().mean() / len(pay), 0.9)
+        # the fictitious supplier must not always be the last supplier ID
+        positions = []
+        for seed in range(5):
+            t = Generator(Config(seed=seed)).run()
+            sup, lb = t["Supplier_Listing"].reset_index(drop=True), t["labels"]
+            fake = sup.index[sup.Supplier_Account_ID.isin(lb[lb.table == "Supplier_Listing"].record_id)]
+            positions.extend(list(fake))
+        self.assertTrue(any(p_ < len(sup) - 1 for p_ in positions))
+
+    def test_ids_follow_dates(self):
+        inv = self.t["Invoices_Received"]
+        self.assertTrue(inv.Entered_Date.is_monotonic_increasing)
+        pay = self.t["Payments_Made"]
+        self.assertTrue(pay.Payment_Date.is_monotonic_increasing)
+
     def test_no_plain_tax_ids(self):
         self.assertNotIn("Supplier_TIN", self.t["Supplier_Listing"].columns)
 

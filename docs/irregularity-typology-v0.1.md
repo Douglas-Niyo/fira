@@ -42,10 +42,10 @@ possible, these checks are designed to act as compensating controls.
 | T19 | Receipts collected but not deposited | v1.1 (planned) | Needs bank-statement data |
 | T20 | Payroll overpayments to oneself | v2 | Needs payroll data |
 
-## Added from practitioner review (D. Niyonsingiza, November 20, 2026)
+## Added after review of the first alert list (reviewed and approved by D. Niyonsingiza, November 20, 2026)
 
-Reviewing the first alert list as a council treasurer would, Douglas identified checks
-that a government finance office makes routinely and that FIRA v1 does not yet cover.
+The review of the first alert list identified checks that a government finance office
+makes routinely and that FIRA v1 does not yet cover.
 They need data FIRA v1 does not read (fund coding, purchase orders, goods receipts,
 budgets, bank statements, review sign-offs), so they are planned for later versions.
 
@@ -58,7 +58,7 @@ budgets, bank statements, review sign-offs), so they are planned for later versi
 | T25 | Cumulative spending above a budget line or contract limit | Budget and contract tables | v2 |
 | T26 | Independent review recorded as done but not actually documented | Review sign-off log | v1.1 |
 
-Douglas also set the review priorities used by `fira/review.py`: bank-change payments,
+The review priorities used by `fira/review.py`, approved by D. Niyonsingiza, are: bank-change payments,
 supplier set-up and payment by one user, invoices paid more than once, and unsupported
 payments first; duplicates and split purchases next; out-of-hours entry and consecutive
 invoice numbers only as context alongside stronger flags; self-approval as a monthly

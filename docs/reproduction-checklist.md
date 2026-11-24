@@ -1,0 +1,4 @@
+# Independent reproduction
+Use an untouched release copy; record its version, SHA256 or Git commit, operating system and Python/package versions. Follow the generation and review commands in README. Compare the regenerated CSV files with data/small_seed42/ and examples/corrected/ using a byte comparison on the same platform or sorted data values where newline conventions differ. Do not compare the data card's creation time.
+
+Check the count of distinct alert IDs (238), review items (28), summaries (19), represented schemes in dated items (15) and calendar months (12). Inspect the two overpayments and resolve an alert ID to its table and record in alert_links.csv. Record deviations, errors, commands and independently obtained counts. A signed or dated report should describe exactly what the reviewer actually ran and any disagreement. No endorsement is requested.

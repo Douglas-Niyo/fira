@@ -1,0 +1,192 @@
+month,user,kind,record_id,supplier_name,amount,date
+2025-07,U01,invoices,INV000016,Pinecrest Power,2065.46,2025-07-16
+2025-07,U01,invoices,INV000014,Tri-County Fuel & Oil,1854.8,2025-07-14
+2025-07,U01,invoices,INV000004,Pioneer IT Solutions,1230.8,2025-07-07
+2025-07,U01,invoices,INV000035,Frontier IT Solutions,638.2,2025-07-28
+2025-07,U01,invoices,INV000024,Granite Office Supply,110.45,2025-07-21
+2025-07,U01,payments,PAY000018,Pinecrest Power,2065.46,2025-07-22
+2025-07,U01,payments,PAY000022,Tri-County Fuel & Oil,1854.8,2025-07-22
+2025-07,U01,payments,PAY000006,Pioneer IT Solutions,1230.8,2025-07-08
+2025-07,U01,payments,PAY000012,Granite Office Supply,110.45,2025-07-22
+2025-08,U01,invoices,INV000065,Ridge Law Group,4721.72,2025-08-16
+2025-08,U01,invoices,INV000063,Ridge Law Group,4619.82,2025-08-15
+2025-08,U01,invoices,INV000060,Ridge Law Group,4283.95,2025-08-14
+2025-08,U01,invoices,INV000076,Valley Equipment Repair,1998.49,2025-08-20
+2025-08,U01,invoices,INV000074,Riverside Fuel & Oil,1634.13,2025-08-20
+2025-08,U01,invoices,INV000085,Granite Fuel & Oil,1247.32,2025-08-25
+2025-08,U01,invoices,INV000090,Valley Telecom,537.94,2025-08-28
+2025-08,U01,invoices,INV000073,Inland IT Solutions,517.77,2025-08-19
+2025-08,U01,invoices,INV000084,Columbia Telecom,439.72,2025-08-25
+2025-08,U01,invoices,INV000092,Pioneer IT Solutions,250.81,2025-08-29
+2025-08,U01,payments,PAY000064,Ridge Law Group,4721.72,2025-08-26
+2025-08,U01,payments,PAY000084,Ridge Law Group,4619.82,2025-08-26
+2025-08,U01,payments,PAY000066,Ridge Law Group,4283.95,2025-08-26
+2025-08,U01,payments,PAY000063,Valley Equipment Repair,1998.49,2025-08-26
+2025-08,U01,payments,PAY000071,Riverside Fuel & Oil,1634.13,2025-08-26
+2025-08,U01,payments,PAY000080,Granite Fuel & Oil,1247.32,2025-08-26
+2025-08,U01,payments,PAY000050,Frontier IT Solutions,638.2,2025-08-12
+2025-08,U01,payments,PAY000061,Inland IT Solutions,517.77,2025-08-26
+2025-08,U01,payments,PAY000079,Columbia Telecom,439.72,2025-08-26
+2025-08,U02,invoices,INV000082,Summit Cleaning Services,785.02,2025-08-22
+2025-08,U02,payments,PAY000076,Summit Cleaning Services,785.02,2025-08-26
+2025-09,U01,invoices,INV000138,Riverside Law Group,4576.52,2025-09-22
+2025-09,U01,invoices,INV000132,Ridge Law Group,1563.4,2025-09-17
+2025-09,U01,invoices,INV000145,Ridge Cleaning Services,679.48,2025-09-26
+2025-09,U01,invoices,INV000121,Ridge Cleaning Services,653.67,2025-09-15
+2025-09,U01,payments,PAY000123,Riverside Law Group,4576.52,2025-09-23
+2025-09,U01,payments,PAY000117,Ridge Law Group,1563.4,2025-09-23
+2025-09,U01,payments,PAY000121,Ridge Cleaning Services,653.67,2025-09-23
+2025-09,U01,payments,PAY000112,Valley Telecom,537.94,2025-09-09
+2025-09,U01,payments,PAY000105,Pioneer IT Solutions,250.81,2025-09-09
+2025-09,U02,invoices,INV000146,Granite Fuel & Oil,1305.02,2025-09-26
+2025-09,U02,invoices,INV000117,Ridge IT Solutions,1192.89,2025-09-15
+2025-09,U02,invoices,INV000118,Tri-County Office Supply,434.64,2025-09-15
+2025-09,U02,payments,PAY000134,Ridge IT Solutions,1192.89,2025-09-23
+2025-09,U02,payments,PAY000131,Tri-County Office Supply,434.64,2025-09-23
+2025-10,U01,invoices,INV000185,Tri-County Aggregates,11822.56,2025-10-23
+2025-10,U01,invoices,INV000173,Granite Engineering,4208.53,2025-10-16
+2025-10,U01,invoices,INV000163,Valley Maintenance Services,2400.0,2025-10-11
+2025-10,U01,invoices,INV000169,Ridge Fuel & Oil,788.52,2025-10-15
+2025-10,U01,invoices,INV000186,Ridge Cleaning Services,617.98,2025-10-24
+2025-10,U01,invoices,INV000189,Valley IT Solutions,459.27,2025-10-27
+2025-10,U01,payments,PAY000171,Tri-County Aggregates,11822.56,2025-10-28
+2025-10,U01,payments,PAY000179,Granite Engineering,4208.53,2025-10-28
+2025-10,U01,payments,PAY000145,Valley Maintenance Services,2400.0,2025-10-14
+2025-10,U01,payments,PAY000184,Ridge Fuel & Oil,788.52,2025-10-28
+2025-10,U01,payments,PAY000149,Ridge Cleaning Services,679.48,2025-10-14
+2025-10,U01,payments,PAY000172,Ridge Cleaning Services,617.98,2025-10-28
+2025-10,U01,payments,PAY000192,Valley IT Solutions,459.27,2025-10-28
+2025-10,U02,payments,PAY000161,Granite Fuel & Oil,1305.02,2025-10-14
+2025-11,U01,invoices,INV000227,Riverside Insurance Pool,17699.9,2025-11-24
+2025-11,U01,invoices,INV000203,Valley Maintenance Services,2000.0,2025-11-08
+2025-11,U01,invoices,INV000221,Riverside Cleaning Services,1245.62,2025-11-21
+2025-11,U01,invoices,INV000224,Ridge Cleaning Services,971.89,2025-11-24
+2025-11,U01,invoices,INV000225,Ridge Fuel & Oil,721.59,2025-11-24
+2025-11,U01,payments,PAY000217,Riverside Insurance Pool,17699.9,2025-11-25
+2025-11,U01,payments,PAY000203,Valley Maintenance Services,2000.0,2025-11-11
+2025-11,U01,payments,PAY000230,Riverside Cleaning Services,1245.62,2025-11-25
+2025-11,U01,payments,PAY000227,Ridge Cleaning Services,971.89,2025-11-25
+2025-11,U01,payments,PAY000221,Ridge Fuel & Oil,721.59,2025-11-25
+2025-11,U01,payments,PAY000205,Columbia Office Supply,224.32,2025-11-11
+2025-12,U01,invoices,INV000276,Granite Engineering,5179.21,2025-12-19
+2025-12,U01,invoices,INV000254,Valley Maintenance Services,2400.0,2025-12-09
+2025-12,U01,invoices,INV000245,Riverside Cleaning Services,1245.62,2025-12-04
+2025-12,U01,invoices,INV000262,Riverside Cleaning Services,1161.62,2025-12-15
+2025-12,U01,invoices,INV000247,Inland IT Solutions,689.16,2025-12-05
+2025-12,U01,invoices,INV000260,Evergreen Telecom,594.09,2025-12-15
+2025-12,U01,invoices,INV000265,Granite Office Supply,227.91,2025-12-15
+2025-12,U01,invoices,INV000238,Tri-County Office Supply,148.11,2025-12-01
+2025-12,U01,invoices,INV000241,Tri-County Office Supply,126.94,2025-12-02
+2025-12,U01,payments,PAY000268,Granite Engineering,5179.21,2025-12-23
+2025-12,U01,payments,PAY000248,Valley Maintenance Services,2400.0,2025-12-09
+2025-12,U01,payments,PAY000238,Riverside Cleaning Services,1245.62,2025-12-09
+2025-12,U01,payments,PAY000259,Riverside Cleaning Services,1161.62,2025-12-23
+2025-12,U01,payments,PAY000239,Inland IT Solutions,689.16,2025-12-09
+2025-12,U01,payments,PAY000279,Evergreen Telecom,594.09,2025-12-23
+2025-12,U01,payments,PAY000280,Granite Office Supply,227.91,2025-12-23
+2025-12,U01,payments,PAY000235,Tri-County Office Supply,148.11,2025-12-09
+2025-12,U01,payments,PAY000253,Tri-County Office Supply,126.94,2025-12-09
+2026-01,U01,invoices,INV000318,Pinecrest Power,2382.6,2026-01-13
+2026-01,U01,invoices,INV000342,Ridge Power,2322.62,2026-01-27
+2026-01,U01,invoices,INV000321,Inland IT Solutions,1641.76,2026-01-13
+2026-01,U01,invoices,INV000317,Summit Fuel & Oil,1632.8,2026-01-13
+2026-01,U01,invoices,INV000306,Valley Maintenance Services,1500.0,2026-01-09
+2026-01,U01,invoices,INV000311,Tri-County Equipment Repair,1332.35,2026-01-12
+2026-01,U01,invoices,INV000295,Summit Equipment Repair,1177.84,2026-01-05
+2026-01,U01,invoices,INV000309,Tri-County Fuel & Oil,913.38,2026-01-12
+2026-01,U01,invoices,INV000339,Tri-County Equipment Repair,773.34,2026-01-26
+2026-01,U01,invoices,INV000326,Valley IT Solutions,677.32,2026-01-20
+2026-01,U01,invoices,INV000345,Pioneer Cleaning Services,547.05,2026-01-29
+2026-01,U01,invoices,INV000305,Granite Fuel & Oil,502.31,2026-01-09
+2026-01,U01,payments,PAY000314,Summit Insurance Pool,2537.2,2026-01-13
+2026-01,U01,payments,PAY000294,Pinecrest Power,2382.6,2026-01-13
+2026-01,U01,payments,PAY000335,Ridge Power,2322.62,2026-01-27
+2026-01,U01,payments,PAY000316,Inland IT Solutions,1641.76,2026-01-13
+2026-01,U01,payments,PAY000321,Summit Fuel & Oil,1632.8,2026-01-13
+2026-01,U01,payments,PAY000320,Valley Maintenance Services,1500.0,2026-01-13
+2026-01,U01,payments,PAY000295,Tri-County Equipment Repair,1332.35,2026-01-13
+2026-01,U01,payments,PAY000292,Summit Equipment Repair,1177.84,2026-01-13
+2026-01,U01,payments,PAY000319,Tri-County Fuel & Oil,913.38,2026-01-13
+2026-01,U01,payments,PAY000340,Tri-County Equipment Repair,773.34,2026-01-27
+2026-01,U01,payments,PAY000325,Valley IT Solutions,677.32,2026-01-27
+2026-01,U01,payments,PAY000305,Granite Fuel & Oil,502.31,2026-01-13
+2026-01,U02,invoices,INV000332,Valley Equipment Repair,1707.3,2026-01-21
+2026-01,U02,invoices,INV000323,Pioneer Cleaning Services,454.99,2026-01-14
+2026-01,U02,payments,PAY000330,Valley Equipment Repair,1707.3,2026-01-27
+2026-01,U02,payments,PAY000329,Pioneer Cleaning Services,454.99,2026-01-27
+2026-02,U01,invoices,INV000378,Granite Engineering,6561.21,2026-02-23
+2026-02,U01,invoices,INV000383,Riverside Equipment Repair,1691.55,2026-02-26
+2026-02,U01,invoices,INV000354,Valley Maintenance Services,1500.0,2026-02-06
+2026-02,U01,invoices,INV000363,Tri-County Fuel & Oil,984.79,2026-02-10
+2026-02,U01,invoices,INV000369,Riverside Fuel & Oil,705.64,2026-02-13
+2026-02,U01,invoices,INV000356,Pinecrest Cleaning Services,534.56,2026-02-06
+2026-02,U01,payments,PAY000378,Granite Engineering,6561.21,2026-02-24
+2026-02,U01,payments,PAY000347,Valley Maintenance Services,1500.0,2026-02-10
+2026-02,U01,payments,PAY000346,Tri-County Fuel & Oil,984.79,2026-02-10
+2026-02,U01,payments,PAY000369,Riverside Fuel & Oil,705.64,2026-02-24
+2026-02,U01,payments,PAY000352,Pioneer Cleaning Services,547.05,2026-02-10
+2026-02,U01,payments,PAY000351,Pinecrest Cleaning Services,534.56,2026-02-10
+2026-02,U02,invoices,INV000381,Tri-County Equipment Repair,1016.4,2026-02-24
+2026-02,U02,invoices,INV000390,Riverside Equipment Repair,378.84,2026-02-27
+2026-02,U02,payments,PAY000376,Tri-County Equipment Repair,1016.4,2026-02-24
+2026-03,U01,invoices,INV000420,Ridge Power,3330.29,2026-03-24
+2026-03,U01,invoices,INV000398,Valley Maintenance Services,2400.0,2026-03-08
+2026-03,U01,invoices,INV000413,Columbia Law Group,2142.46,2026-03-18
+2026-03,U01,invoices,INV000395,Riverside Fuel & Oil,1776.76,2026-03-06
+2026-03,U01,invoices,INV000424,Riverside Cleaning Services,946.28,2026-03-25
+2026-03,U01,invoices,INV000410,Valley IT Solutions,874.79,2026-03-13
+2026-03,U01,invoices,INV000422,Granite Fuel & Oil,844.5,2026-03-24
+2026-03,U01,invoices,INV000428,Tri-County Office Supply,145.24,2026-03-30
+2026-03,U01,invoices,INV000418,Granite Office Supply,144.25,2026-03-23
+2026-03,U01,payments,PAY000416,Ridge Power,3330.29,2026-03-24
+2026-03,U01,payments,PAY000414,Cascade Engineering,2959.77,2026-03-24
+2026-03,U01,payments,PAY000405,Valley Maintenance Services,2400.0,2026-03-10
+2026-03,U01,payments,PAY000415,Columbia Law Group,2142.46,2026-03-24
+2026-03,U01,payments,PAY000402,Riverside Fuel & Oil,1776.76,2026-03-10
+2026-03,U01,payments,PAY000396,Riverside Equipment Repair,1691.55,2026-03-10
+2026-03,U01,payments,PAY000408,Valley IT Solutions,874.79,2026-03-24
+2026-03,U01,payments,PAY000412,Granite Fuel & Oil,844.5,2026-03-24
+2026-03,U01,payments,PAY000419,Granite Office Supply,144.25,2026-03-24
+2026-03,U02,payments,PAY000394,Riverside Equipment Repair,378.84,2026-03-10
+2026-04,U01,invoices,INV000438,Ridge Aggregates,4257.69,2026-04-01
+2026-04,U01,invoices,INV000472,Riverside Cleaning Services,1294.98,2026-04-20
+2026-04,U01,invoices,INV000462,Tri-County Fuel & Oil,1177.51,2026-04-13
+2026-04,U01,invoices,INV000460,Tri-County Fuel & Oil,802.05,2026-04-07
+2026-04,U01,invoices,INV000450,Columbia Telecom,546.6,2026-04-06
+2026-04,U01,invoices,INV000484,Valley Office Supply,439.64,2026-04-27
+2026-04,U01,payments,PAY000431,Ridge Aggregates,4257.69,2026-04-14
+2026-04,U01,payments,PAY000488,Riverside Cleaning Services,1294.98,2026-04-28
+2026-04,U01,payments,PAY000440,Tri-County Fuel & Oil,1177.51,2026-04-14
+2026-04,U01,payments,PAY000459,Riverside Cleaning Services,946.28,2026-04-14
+2026-04,U01,payments,PAY000445,Tri-County Fuel & Oil,802.05,2026-04-14
+2026-04,U01,payments,PAY000438,Columbia Telecom,546.6,2026-04-14
+2026-04,U01,payments,PAY000490,Valley Office Supply,439.64,2026-04-28
+2026-04,U01,payments,PAY000434,Tri-County Office Supply,145.24,2026-04-14
+2026-05,U01,invoices,INV000525,Valley Chemical Supply,4907.67,2026-05-25
+2026-05,U01,invoices,INV000527,Valley Chemical Supply,4763.44,2026-05-26
+2026-05,U01,invoices,INV000531,Valley Chemical Supply,4482.27,2026-05-27
+2026-05,U01,invoices,INV000519,Pinecrest Power,2014.33,2026-05-19
+2026-05,U01,invoices,INV000526,Pinecrest Power,1690.08,2026-05-25
+2026-05,U01,invoices,INV000503,Tri-County Fuel & Oil,1265.58,2026-05-08
+2026-05,U01,invoices,INV000518,Pioneer IT Solutions,851.37,2026-05-19
+2026-05,U01,payments,PAY000525,Valley Chemical Supply,4907.67,2026-05-26
+2026-05,U01,payments,PAY000519,Valley Chemical Supply,4763.44,2026-05-26
+2026-05,U01,payments,PAY000518,Evergreen Power,2887.51,2026-05-26
+2026-05,U01,payments,PAY000530,Pinecrest Power,2014.33,2026-05-26
+2026-05,U01,payments,PAY000529,Pinecrest Power,1690.08,2026-05-26
+2026-05,U01,payments,PAY000506,Tri-County Fuel & Oil,1265.58,2026-05-12
+2026-05,U01,payments,PAY000520,Pioneer IT Solutions,851.37,2026-05-26
+2026-06,U01,invoices,INV000560,Evergreen Aggregates,11197.31,2026-06-19
+2026-06,U01,invoices,INV000543,Ridge Aggregates,2546.78,2026-06-08
+2026-06,U01,invoices,INV000550,Riverside Fuel & Oil,542.44,2026-06-11
+2026-06,U01,payments,PAY000564,Evergreen Aggregates,11197.31,2026-06-23
+2026-06,U01,payments,PAY000539,Valley Chemical Supply,4482.27,2026-06-09
+2026-06,U01,payments,PAY000550,Ridge Aggregates,2546.78,2026-06-09
+2026-06,U01,payments,PAY000571,Riverside Fuel & Oil,542.44,2026-06-23
+2026-06,U02,invoices,INV000552,Summit Engineering,4157.93,2026-06-15
+2026-06,U02,invoices,INV000559,Pinecrest Power,2557.46,2026-06-19
+2026-06,U02,invoices,INV000538,Pinecrest Engineering,1409.16,2026-06-03
+2026-06,U02,invoices,INV000577,Riverside Equipment Repair,360.55,2026-06-29
+2026-06,U02,payments,PAY000565,Summit Engineering,4157.93,2026-06-23
+2026-06,U02,payments,PAY000572,Pinecrest Power,2557.46,2026-06-23
+2026-06,U02,payments,PAY000538,Pinecrest Engineering,1409.16,2026-06-09

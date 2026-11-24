@@ -72,11 +72,11 @@ class Rules:
         sup = t["Supplier_Listing"]
         self.sup_name = dict(zip(sup.Supplier_Account_ID, sup.Supplier_Account_Name)) if len(sup) else {}
 
-    def _add(self, rule, typ, table, record_id, supplier, amount, when, reason, control, related=""):
+    def _add(self, rule, typ, table, record_id, supplier, amount, when, reason, control, related="", user_id="", application_ids="", invoice_id=""):
         self.alerts.append(dict(rule=rule, type=typ, table=table, record_id=record_id,
                                 supplier_id=supplier, supplier_name=self.sup_name.get(supplier, ""),
                                 amount=amount, date=when, reason=reason, control=control,
-                                related_records=related))
+                                related_records=related,user_id=user_id,application_ids=application_ids,invoice_id=invoice_id))
 
     # ---------------- duplicates ----------------
     def duplicates(self):
@@ -90,6 +90,7 @@ class Rules:
             rows = g.to_dict("records")
             for i, a in enumerate(rows):
                 for b in rows[:i]:
+                    if a["Invoice_ID"] == b["Invoice_ID"]: continue
                     same_amt = abs(a["Invoice_Amount_Local"] - b["Invoice_Amount_Local"]) <= tol * max(
                         abs(b["Invoice_Amount_Local"]), 0.01)
                     exact_amt = a["Invoice_Amount_Local"] == b["Invoice_Amount_Local"]
@@ -101,7 +102,7 @@ class Rules:
                                   f"{_money(a['Invoice_Amount_Local'])} as invoice {b['Invoice_ID']}.",
                                   DISBURSE, b["Invoice_ID"])
                         break
-                    if a["n"] and a["n"] == b["n"] and same_amt:
+                    if close and a["n"] and a["n"] == b["n"] and same_amt:
                         self._add("R02", "T02", "Invoices_Received", a["Invoice_ID"], sid,
                                   a["Invoice_Amount_Local"], a["Entered_Date"],
                                   f"This may be a duplicate bill: invoice number '{a['Invoice_Number']}' looks like "
@@ -121,15 +122,19 @@ class Rules:
         app, inv = self.t["AP_Cash_Application"], self.t["Invoices_Received"]
         if app.empty:
             return
-        tot = app.groupby("Invoice_ID").agg(paid=("AP_Application_Amount", "sum"),
-                                             n=("Payment_ID", "count"),
-                                             pays=("Payment_ID", lambda s: ";".join(s)))
-        m = tot.join(inv.set_index("Invoice_ID")[["Invoice_Amount_Local", "Supplier_Account_ID"]])
-        for iid, r in m[m.paid > m.Invoice_Amount_Local + 0.01].iterrows():
-            last = r.pays.split(";")[-1]
-            self._add("R04", "T04", "Payments_Made", last, r.Supplier_Account_ID, r.paid, "",
-                      f"Invoice {iid} for {_money(r.Invoice_Amount_Local)} has {r.n} payments totalling "
-                      f"{_money(r.paid)}.", DISBURSE, r.pays)
+        lookup=inv.set_index("Invoice_ID")
+        for iid,g in app.sort_values(["AP_Application_Date","AP_Application_ID"]).groupby("Invoice_ID"):
+            if iid not in lookup.index: continue
+            bill=lookup.loc[iid]
+            total=0; pays=[]; apps=[]
+            for r in g.itertuples():
+                total+=int(round(100*r.AP_Application_Amount)); pays.append(r.Payment_ID); apps.append(r.AP_Application_ID)
+                if total>int(round(100*bill.Invoice_Amount_Local))+1:
+                    self._add("R04","T04","Payments_Made",r.Payment_ID,bill.Supplier_Account_ID,total/100,
+                              max(r.AP_Application_Date,bill.Entered_Date),
+                              f"Payments applied to invoice {iid} total {_money(total/100)} against a bill of {_money(bill.Invoice_Amount_Local)}. Check whether both amounts cleared and whether a credit is due.",
+                              DISBURSE,";".join(dict.fromkeys(pays)),application_ids=";".join(apps),invoice_id=iid)
+                    break
 
     # ---------------- vendor master ----------------
     def bank_change_then_payment(self):
@@ -188,7 +193,7 @@ class Rules:
                                       b["Supplier_Account_Name"].lower()).ratio()
                 same_addr = (a["Supplier_Physical_Street_Address1"].lower() ==
                              b["Supplier_Physical_Street_Address1"].lower())
-                if same_tin or sim >= 0.92 or same_addr:
+                if same_tin or sim >= 0.92 or (same_addr and a["Supplier_Physical_Street_Address1"].strip()):
                     self._add("R11", "T11", "Supplier_Listing", a["Supplier_Account_ID"],
                               a["Supplier_Account_ID"], None, a["Entered_Date"],
                               f"May duplicate supplier {b['Supplier_Account_ID']} "
@@ -206,7 +211,7 @@ class Rules:
                     self._add("R07", "T07", table, r[key], r.Supplier_Account_ID, r[amt], r[d],
                               f"The same user ({r.Entered_By}) entered and approved this "
                               f"{'invoice' if table == 'Invoices_Received' else 'payment'}. Check for a separate, "
-                              f"documented review.", SEGREGATION)
+                              f"documented review.", SEGREGATION, user_id=r.Entered_By)
                 elif not r.Approved_By and r[amt] >= thr:
                     self._add("R08", "T08", table, r[key], r.Supplier_Account_ID, r[amt], r[d],
                               f"No approval recorded for {_money(r[amt])}, above the {_money(thr)} threshold.",
@@ -219,8 +224,10 @@ class Rules:
         below = inv[(inv.Invoice_Amount_Local < thr) & (inv.Invoice_Amount_Local >= 0.5 * thr)]
         for sid, g in below.sort_values("d").groupby("Supplier_Account_ID"):
             rows = g.to_dict("records")
+            consumed=set()
             for i, a in enumerate(rows):
-                group = [b for b in rows if 0 <= (b["d"] - a["d"]).days <= win]
+                if a["Invoice_ID"] in consumed: continue
+                group = [b for b in rows if b["Invoice_ID"] not in consumed and 0 <= (b["d"] - a["d"]).days <= win]
                 total = sum(b["Invoice_Amount_Local"] for b in group)
                 if len(group) >= 2 and total >= thr:
                     for b in group:
@@ -230,7 +237,7 @@ class Rules:
                                   f"{_money(thr)} approval threshold but together total {_money(total)}. Check whether "
                                   f"they relate to one purchase requiring higher approval.", APPROVAL,
                                   ";".join(x["Invoice_ID"] for x in group))
-                    break
+                    consumed.update(x["Invoice_ID"] for x in group)
 
     # ---------------- timing and patterns ----------------
     def timing(self):
@@ -238,7 +245,7 @@ class Rules:
         inv = self.t["Invoices_Received"].set_index("Invoice_ID")
         inactive = {r.Supplier_Account_ID: r.Inactive_Date for _, r in sup.iterrows() if r.Inactive_Date}
         linked = set(app.Payment_ID)
-        first_inv = app.groupby("Payment_ID").Invoice_ID.first().to_dict()
+        linked_inv = app.groupby("Payment_ID").Invoice_ID.apply(list).to_dict()
         for _, p in pay.iterrows():
             why = []
             if p.Payment_ID not in linked:
@@ -246,8 +253,8 @@ class Rules:
             ia = inactive.get(p.Supplier_Account_ID)
             if ia and p.Payment_Date >= ia:
                 why.append(f"went to a supplier already marked inactive on {ia}")
-            iid = first_inv.get(p.Payment_ID)
-            if iid in inv.index and p.Payment_Date < inv.loc[iid, "Invoice_Date"]:
+            ids = linked_inv.get(p.Payment_ID, [])
+            if any(iid in inv.index and p.Payment_Date < inv.loc[iid, "Invoice_Date"] for iid in ids):
                 why.append("is dated before its invoice")
             if why:
                 self._add("R15", "T15", "Payments_Made", p.Payment_ID, p.Supplier_Account_ID,
@@ -269,7 +276,7 @@ class Rules:
                               r.Entered_Date,
                               f"{len(g)} invoices from this supplier have consecutive or nearly consecutive numbers "
                               f"({int(g.n.min())} to {int(g.n.max())}). This can be legitimate; review alongside "
-                              f"other supplier concerns.", MASTER)
+                              f"other supplier concerns.", MASTER, ";".join(g.Invoice_ID))
 
     def after_hours(self):
         st, en = self.s["business_start"], self.s["business_end"]
@@ -282,14 +289,14 @@ class Rules:
                           f"Entered outside business hours ({r.Entered_Date} at {r.Entered_Time}).", SEGREGATION)
 
     def run(self) -> pd.DataFrame:
+        self.alerts=[]
         for f in [self.duplicates, self.paid_more_than_billed, self.bank_change_then_payment,
                   self.supplier_created_and_paid_by_same_user, self.supplier_master_quality,
                   self.approvals, self.split_purchases, self.timing,
                   self.consecutive_invoice_numbers, self.after_hours]:
             f()
-        df = pd.DataFrame(self.alerts)
-        if not df.empty:
-            df.insert(0, "alert_id", [f"A{i + 1:05d}" for i in range(len(df))])
+        df = pd.DataFrame(self.alerts, columns="rule type table record_id supplier_id supplier_name amount date reason control related_records user_id application_ids invoice_id".split())
+        df.insert(0, "alert_id", [f"A{i + 1:05d}" for i in range(len(df))])
         return df
 
 
@@ -298,7 +305,12 @@ def main(argv=None):
     p.add_argument("--data", default="data/small_seed42")
     p.add_argument("--out", default="alerts.csv")
     a = p.parse_args(argv)
-    alerts = Rules(load(a.data)).run()
+    import json
+    from .monthly import monthly,contract
+    folder=Path(a.data)
+    if (folder/"AP_Adjustments.csv").exists(): raise ValueError("Unsupported adjustments")
+    profile=json.loads((folder/"profile.json").read_text())
+    alerts=monthly(contract(load(folder),profile),profile["start"])["raw_alerts"]
     alerts.to_csv(a.out, index=False)
     print(f"{len(alerts)} alerts written to {a.out}")
     if len(alerts):
