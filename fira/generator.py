@@ -30,7 +30,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-GENERATOR_VERSION = "0.1.1"
+GENERATOR_VERSION = "0.2.0"
 
 
 @dataclass
@@ -38,6 +38,8 @@ class Config:
     seed: int = 42
     start: str = "2025-07-01"          # fiscal year start
     days: int = 365
+    stress: bool = False
+    intensity: float = 1.0
     n_suppliers: int = 60
     approval_threshold: float = 5000.0
     bank_change_window_days: int = 30
@@ -116,7 +118,7 @@ class Generator:
     def _meeting_dates(self) -> list[date]:
         # 2nd and 4th Tuesday of each month
         out, d = [], self.start
-        while d <= self.end:
+        while d <= self.end + timedelta(days=95):
             if d.weekday() == 1 and ((d.day - 1) // 7) in (1, 3):
                 out.append(d)
             d += timedelta(days=1)
@@ -158,7 +160,7 @@ class Generator:
     def build_invoices(self, sup: pd.DataFrame) -> pd.DataFrame:
         rows = []
         for _, s in sup.iterrows():
-            n = max(1, int(self.rng.poisson(s._per_year * self.cfg.days / 365)))
+            n = max(1, int(self.rng.poisson(s._per_year * self.cfg.intensity * self.cfg.days / 365)))
             days = np.sort(self.rng.integers(0, self.cfg.days, n))
             seq = s._inv_seq
             for d in days:
@@ -189,7 +191,7 @@ class Generator:
         pays, apps = [], []
         for _, r in inv.iterrows():
             due = date.fromisoformat(r.Entered_Date)
-            pay_date = next((m for m in meetings if m >= due), self.end)
+            pay_date = next(m for m in meetings if m >= due)
             pid, aid = self._new_payment(r.Supplier_Account_ID, pay_date, r.Invoice_Amount_Local,
                                          r.Entered_By, r.Approved_By, r.Invoice_ID, pays, apps)
         return pays, apps
@@ -220,7 +222,7 @@ class Generator:
         return self.start + timedelta(days=int(self.rng.integers(lo, hi)))
 
     def _next_meeting(self, d: date) -> date:
-        return next((m for m in self._meeting_dates() if m >= d), self.end)
+        return next(m for m in self._meeting_dates() if m >= d)
 
     # ---------- injected irregularities ----------
     def inject(self, sup, inv, pays, apps, chg):
@@ -250,6 +252,7 @@ class Generator:
             num = str(o["Invoice_Number"])
             fmt = self.rng.choice([f"INV-{num}", f"0{num}", f"{num[:2]}-{num[2:]}", f"{num} "])
             d = date.fromisoformat(o["Entered_Date"]) + timedelta(days=int(self.rng.integers(5, 25)))
+            if self.cfg.stress: fmt=f"REF/{num}/A"
             new = dict(o, Invoice_ID=self._next("INV"), Invoice_Number=str(fmt), Entered_Date=d.isoformat())
             inv_rows.append(new)
             pid, _ = self._new_payment(o["Supplier_Account_ID"], self._next_meeting(d),
@@ -271,6 +274,7 @@ class Generator:
         for _ in range(self.cfg.n_legit_bank_changes):
             s = sup.iloc[int(self.rng.integers(len(sup)))]
             d = self._rand_day()
+            while any(c["Supplier_Account_ID"]==s.Supplier_Account_ID and c["Changed_Date"]==d.isoformat() for c in chg): d += timedelta(days=1)
             chg.append(dict(Supplier_Account_ID=s.Supplier_Account_ID, Changed_Field="bank_account",
                             Old_Value_Hash=_hash(f"old{d}{s.Supplier_Account_ID}"),
                             New_Value_Hash=_hash(f"new{d}{s.Supplier_Account_ID}"),
@@ -282,9 +286,10 @@ class Generator:
             k += 1; sid = f"S{k:03d}"
             s = sup[sup._median > 1500].sample(1, random_state=int(self.rng.integers(1e9))).iloc[0]
             d = self._rand_day()
+            while any(c["Supplier_Account_ID"]==s.Supplier_Account_ID and c["Changed_Date"]==d.isoformat() for c in chg): d += timedelta(days=1)
             chg.append(dict(Supplier_Account_ID=s.Supplier_Account_ID, Changed_Field="bank_account",
                             Old_Value_Hash=_hash(f"o{sid}"), New_Value_Hash=_hash(f"n{sid}"),
-                            Changed_By="U02", Changed_Date=d.isoformat(), Changed_Time="18:42:00"))
+                            Changed_By="U01" if self.cfg.stress else "U02", Changed_Date=d.isoformat(), Changed_Time="11:12:00" if self.cfg.stress else "18:42:00"))
             amt = round(float(s._median) * float(self.rng.uniform(2.0, 4.0)), 2)
             inv_d = d + timedelta(days=int(self.rng.integers(1, 6)))
             iid = self._next("INV")
@@ -340,7 +345,7 @@ class Generator:
             seq = int(s._inv_seq) + 50000
             for j in range(parts):
                 amt = round(self.cfg.approval_threshold * float(self.rng.uniform(0.85, 0.99)), 2)
-                dd = d + timedelta(days=j)
+                dd = d + timedelta(days=(12*j//(parts-1) if self.cfg.stress else j))
                 iid = self._next("INV")
                 inv_rows.append(dict(Invoice_ID=iid, Invoice_Number=f"{seq + j * 7}",
                                      Invoice_Date=dd.isoformat(), Invoice_Due_Date=(dd + timedelta(days=30)).isoformat(),
@@ -371,7 +376,17 @@ class Generator:
                 if inactive_from + timedelta(days=45) < self.end:
                     break
             else:
-                raise RuntimeError("no supplier available for T15 injection")
+                # At high volume every active supplier may have a late payment.
+                # Add a retired synthetic supplier rather than backdating active history.
+                retired=sup.iloc[0].copy()
+                sup_id=self._next("SUP")
+                retired["Supplier_Account_ID"]=sup_id
+                retired["Supplier_Account_Name"]=f"Retired supplier {k}"
+                retired["Supplier_Physical_Street_Address1"]=f"{k} Old Route"
+                retired["Supplier_TIN_Hash"]=_hash("TIN-"+sup_id)
+                sup=pd.concat([sup,pd.DataFrame([retired])],ignore_index=True)
+                idx=len(sup)-1
+                inactive_from=self._rand_day(50,200)
             used.add(sup_id)
             sup.loc[sup.index[idx], "Inactive_Date"] = inactive_from.isoformat()
             d = self._next_meeting(inactive_from + timedelta(days=int(self.rng.integers(10, 40))))
@@ -383,28 +398,86 @@ class Generator:
         return sup, pd.DataFrame(inv_rows)
 
     # ---------- run ----------
+    def _renumber(self, sup, inv, pays, apps, chg):
+        """Re-assign all IDs so they reveal nothing about which records were planted.
+
+        Planted records are created after normal ones, so their raw IDs and check numbers
+        would be the highest. Suppliers get IDs in random order; invoices, payments, check
+        numbers and applications get IDs in date order, as an ERP would assign them.
+        """
+        rng = self.rng
+        sup = sup.sample(frac=1, random_state=int(rng.integers(1e9))).reset_index(drop=True)
+        smap = {old: f"SUP{i + 1:06d}" for i, old in enumerate(sup.Supplier_Account_ID)}
+        sup["Supplier_Account_ID"] = sup.Supplier_Account_ID.map(smap)
+
+        inv = inv.assign(_r=rng.random(len(inv))).sort_values(["Entered_Date", "Entered_Time", "_r"])
+        imap = {old: f"INV{i + 1:06d}" for i, old in enumerate(inv.Invoice_ID)}
+        inv = inv.drop(columns="_r").assign(Invoice_ID=lambda d: d.Invoice_ID.map(imap),
+                                            Supplier_Account_ID=lambda d: d.Supplier_Account_ID.map(smap))
+
+        pay = pd.DataFrame(pays)
+        pay = pay.assign(_r=rng.random(len(pay))).sort_values(["Payment_Date", "_r"])
+        pmap = {old: f"PAY{i + 1:06d}" for i, old in enumerate(pay.Payment_ID)}
+        pay = pay.drop(columns="_r").assign(Payment_ID=lambda d: d.Payment_ID.map(pmap),
+                                            Supplier_Account_ID=lambda d: d.Supplier_Account_ID.map(smap),
+                                            Reference_Number=[str(10001 + i) for i in range(len(pay))])
+
+        app = pd.DataFrame(apps)
+        app = app.assign(_r=rng.random(len(app))).sort_values(["AP_Application_Date", "_r"])
+        app = app.drop(columns="_r").assign(
+            AP_Application_ID=[f"APP{i + 1:06d}" for i in range(len(app))],
+            Payment_ID=lambda d: d.Payment_ID.map(pmap), Invoice_ID=lambda d: d.Invoice_ID.map(imap),
+            Supplier_Account_ID=lambda d: d.Supplier_Account_ID.map(smap))
+
+        chg = pd.DataFrame(chg, columns=["Supplier_Account_ID","Changed_Field","Old_Value_Hash","New_Value_Hash","Changed_By","Changed_Date","Changed_Time"])
+        if len(chg):
+            chg = chg.assign(Supplier_Account_ID=chg.Supplier_Account_ID.map(smap)).sort_values(
+                ["Changed_Date", "Changed_Time"]).reset_index(drop=True)
+
+        lab = pd.DataFrame(self.labels, columns=["scheme_id","type","table","record_id","note"])
+
+        def remap(row):
+            rid, t = row.record_id, row.table
+            if t == "Invoices_Received":
+                return imap[rid]
+            if t == "Payments_Made":
+                return pmap[rid]
+            if t == "Supplier_Listing":
+                return smap[rid]
+            if t == "FIRA_Supplier_Change_Log":
+                sid, d = rid.split("@")
+                return f"{smap[sid]}@{d}"
+            return rid
+        if len(lab):
+            lab["record_id"] = lab.apply(remap, axis=1)
+            lab["note"] = lab["note"].replace(imap, regex=False)
+            lab["note"] = lab["note"].map(lambda x: " ".join(imap.get(w, w) for w in str(x).split(" ")))
+        return (sup, inv.reset_index(drop=True), pay.reset_index(drop=True), app.reset_index(drop=True),
+                chg, lab)
+
     def run(self) -> dict[str, pd.DataFrame]:
         sup = self.build_suppliers()
         inv = self.build_invoices(sup)
         pays, apps = self.pay_invoices(inv)
         chg: list[dict] = []
         sup, inv = self.inject(sup, inv, pays, apps, chg)
-        # suppliers whose invoices were all made up later are still fine; drop helper columns
         sup = sup[[c for c in sup.columns if not c.startswith("_")]]
+        sup, inv, pay, app, chg, lab = self._renumber(sup, inv, pays, apps, chg)
         users = pd.DataFrame([dict(User_ID=u, User_Name=n, Role=r) for u, n, r in USERS])
         return {
             "Supplier_Listing": sup,
-            "Invoices_Received": inv.sort_values("Invoice_ID").reset_index(drop=True),
-            "Payments_Made": pd.DataFrame(pays).sort_values("Payment_ID").reset_index(drop=True),
-            "AP_Cash_Application": pd.DataFrame(apps).sort_values("AP_Application_ID").reset_index(drop=True),
-            "FIRA_Supplier_Change_Log": pd.DataFrame(chg),
+            "Invoices_Received": inv,
+            "Payments_Made": pay,
+            "AP_Cash_Application": app,
+            "FIRA_Supplier_Change_Log": chg,
             "User_Listing": users,
-            "labels": pd.DataFrame(self.labels),
+            "labels": lab,
         }
 
 
 def write(tables: dict[str, pd.DataFrame], out: Path, cfg: Config) -> None:
     out.mkdir(parents=True, exist_ok=True)
+    (out / "profile.json").write_text(json.dumps({"currency":"USD","invoice_rows":"one_per_invoice","start":cfg.start,"months":12,"mode":"synthetic_snapshot"}))
     for name, df in tables.items():
         df.to_csv(out / f"{name}.csv", index=False)
     labels = tables["labels"]

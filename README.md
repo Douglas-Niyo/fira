@@ -1,45 +1,30 @@
-# FIRA — Financial Integrity and Risk Analytics
+# FIRA | monthly payment review
+Development release 0.2.0, benchmark protocol v0.5 draft • synthetic accounts payable • Douglas Niyonsingiza
 
-**Status: early research (started October 2026). Nothing here is production software.**
+FIRA gives an independent reviewer at a small local government a short monthly list of payments and invoices to check, with explanations and access to supporting records. The reviewer investigates and documents the outcome. A flag is not a finding of wrongdoing. Nonprofit recipients of federal funds are a second intended population; this release does not establish that the method works for them.
 
-FIRA is an open research project that asks a practical question:
+**Start with [the before-and-after example](examples/BEFORE-AFTER.md), then [the November pack](examples/November-review.md).** Source data are entirely synthetic. No institutional affiliation or endorsement is implied.
 
-> Can small U.S. local governments and nonprofits, offices where one or two people
-> often handle vendors, invoices, payments and reconciliations, use transparent,
-> explainable checks on their ordinary ERP exports to catch payment irregularities
-> earlier, with an alert workload they can actually review?
+## Reproduce locally
+Tested with Python 3.12.14. From this folder (macOS/Linux):
+```sh
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m unittest -v
+python -m fira.generator --seed 42 --out reproduced/data
+python -m fira.review --data reproduced/data --out reproduced/pack
+python -m fira.benchmark --out reproduced/benchmark-development
+```
+Choose a new output folder for each benchmark. Development mode exercises four known configurations; its enriched seed 42 plants one of each type and is distinct from the 15-scheme example. Running the generator and review commands with the default configuration reproduces the demonstration. Compare CSV outputs; the data-card creation timestamp is intentionally variable.
 
-## Why this matters
+## Files
+- `examples/corrected/`: all twelve months, raw alerts, summary and detail rows, record links and an invoice-source-row map. Context-only alerts remain searchable even when they do not receive a top-level line.
+- `docs/schema-v0.1.md`: current supported subset and limitations (legacy filename). No production imports or real confidential records.
+- `docs/evaluation-v0.5.md`: current protocol awaiting author approval. The older draft is historical.
+- [v0.5 development comparison](examples/protocol-v0.5-development/comparison.md): revised queue, supplier features and ranking tradeoffs.
+- `examples/development-benchmark/`: archived v0.4 development-only results, never evidence from a frozen experiment.
+- `docs/review-protocol-v0.1.md`: independent reviewer duties and the proposed human study.
 
-Segregation of duties is a basic internal control, but in a town or nonprofit with a
-one- or two-person finance office it is often not possible. FIRA studies automated,
-explainable checks that can act as *compensating controls* in that setting.
-
-## Planned scope (version 1)
-
-- Accounts payable and vendor master data only (invoices, payments, vendor changes).
-- Transparent control rules, each with a reason code and a control reference.
-- Simple unsupervised scoring (e.g., Isolation Forest, peer-group z-scores).
-- A ranked review queue in which every alert is explained in plain accounting terms.
-- An open benchmark: synthetic data with labeled, injected irregularities, plus the evaluation code.
-- Runs locally. No financial data is uploaded anywhere.
-
-## What FIRA is not
-
-- It does not decide whether fraud occurred. It flags items for human review.
-- Results on synthetic data do not prove real-world effectiveness.
-- It uses no confidential employer, client, donor or government data.
-
-## Research questions
-
-See [docs/research-questions.md](docs/research-questions.md).
-
-## Author
-
-Douglas Niyonsingiza: accountant (government and nonprofit), MS in Information Technology.
-ORCID: [0009-0000-1094-9269](https://orcid.org/0009-0000-1094-9269)
-
-
-## License
-
-Apache License 2.0 (see `LICENSE`).
+## Formal benchmark (after public protocol freeze only)
+Publish the reviewed freeze commit and tag per the protocol. In a clean checkout of that tag, use `python -m fira.benchmark --formal --out ../FIRA-formal-results`. Keep output outside the source tree. The runner checks the local tag and tracked files; it cannot verify that the protocol was published. Preserve partial outputs and report failures. Do not replace development evidence with claims of measured time saved, avoided losses or verified real-world detection.

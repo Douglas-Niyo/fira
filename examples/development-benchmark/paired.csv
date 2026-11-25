@@ -1,0 +1,5 @@
+size,family,target,metric,n,pressure,delta,lo,hi,p
+600,enriched,0.0,fsr,1,0.0,0.0,0.0,0.0,
+600,enriched,0.0,coverage,1,0.0,0.0,0.0,0.0,
+600,prevalence,0.001,fsr,0,0.0,,,,
+600,prevalence,0.001,coverage,0,0.0,,,,

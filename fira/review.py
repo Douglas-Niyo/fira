@@ -1,7 +1,7 @@
 """Monthly review pack for the independent reviewer (rules-only baseline, v0.1).
 
-Turns raw rule alerts into what a board member can act on, following the
-practitioner review by D. Niyonsingiza (2026-11-20):
+Turns raw rule alerts into what a board member can act on. Design reviewed and
+approved by D. Niyonsingiza (2026-11-20):
 
 * Tier 1 (check first): bank-change payments (R05), supplier created and paid by one
   user (R06), invoices paid more than once (R04), payments without invoices or to
@@ -37,7 +37,7 @@ def _month(d: str) -> str:
     return str(d)[:7] if d else ""
 
 
-def build(alerts: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+def build(alerts: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     a = alerts.copy()
     a["amount"] = pd.to_numeric(a["amount"], errors="coerce")
     a["month"] = a["date"].map(_month)
@@ -48,29 +48,33 @@ def build(alerts: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     tiered["tier"] = tiered.rule.map(TIER)
     flagged_suppliers = set(tiered.supplier_id)
     ctx = a[a.rule.isin(CONTEXT) & a.supplier_id.isin(flagged_suppliers)]
-    ctx_by_sup = ctx.groupby("supplier_id").reason.apply(lambda s: " | ".join(sorted(set(s))))
+    ctx_by_sup = ctx.groupby(["supplier_id","month"]).reason.apply(lambda s: " | ".join(sorted(set(s))))
 
     items = (tiered.groupby(["month", "tier", "supplier_id"], dropna=False)
              .agg(supplier_name=("supplier_name", "first"),
                   rules=("rule", lambda s: ",".join(sorted(set(s)))),
                   records=("record_id", lambda s: ";".join(s)),
-                  total_amount=("amount", "sum"),
+
                   largest_amount=("amount", "max"),
                   reasons=("reason", lambda s: " | ".join(dict.fromkeys(s))))
              .reset_index())
-    items["context"] = items.supplier_id.map(ctx_by_sup).fillna("")
+    items["context"] = [ctx_by_sup.get((r.supplier_id,r.month),"") for r in items.itertuples()]
     items = items.sort_values(["month", "tier", "largest_amount"], ascending=[True, True, False])
     items.insert(0, "item_id", [f"I{i + 1:04d}" for i in range(len(items))])
 
     sa = a[a.rule == "R07"].copy()
-    sa["user"] = sa.reason.str.extract(r"\((U\d+)\)")
+    sa["user"] = sa["user_id"]
     sa["kind"] = sa.table.map({"Invoices_Received": "invoices", "Payments_Made": "payments"})
     summary = (sa.groupby(["month", "user", "kind"])
                .agg(count=("record_id", "count"), dollars=("amount", "sum"))
                .unstack("kind", fill_value=0))
     summary.columns = [f"{k}_{m}" for m, k in summary.columns]
     summary = summary.reset_index()
-    return items, summary
+    summary=summary.reindex(columns=["month","user","invoices_count","payments_count","invoices_dollars","payments_dollars"],fill_value=0)
+    # drill-down: every self-approved record stays reachable behind its summary line
+    detail = sa[["month", "user", "kind", "record_id", "supplier_name", "amount", "date"]]
+    detail = detail.sort_values(["month", "user", "kind", "amount"], ascending=[True, True, True, False])
+    return items, summary, detail
 
 
 def main(argv=None):
@@ -78,15 +82,8 @@ def main(argv=None):
     p.add_argument("--data", default="data/small_seed42")
     p.add_argument("--out", default="review")
     a = p.parse_args(argv)
-    alerts = Rules(load(a.data)).run()
-    items, summary = build(alerts)
-    out = Path(a.out)
-    out.mkdir(parents=True, exist_ok=True)
-    items.to_csv(out / "review_items.csv", index=False)
-    summary.to_csv(out / "self_approval_summary.csv", index=False)
-    print(f"{len(alerts)} raw alerts -> {len(items)} review items "
-          f"({(items.tier == 1).sum()} tier 1, {(items.tier == 2).sum()} tier 2) "
-          f"+ {len(summary)} monthly self-approval summary lines")
+    from .monthly import export
+    export(a.data,a.out)
 
 
 if __name__ == "__main__":
