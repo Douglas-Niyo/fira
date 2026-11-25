@@ -20,9 +20,9 @@ not used during development (seed 42 is the development seed).
 
 ## 2026-11-20: practitioner review and review pack (rules v0.1.1, seed 42)
 
-- I have reviewed the 239 alerts as a council treasurer would. My priorities, alert
+- Douglas reviewed the 239 alerts as a council treasurer would. His priorities, alert
   wording and self-approval summary design are now in `fira/rules.py` and `fira/review.py`.
-- Reproduced on my MacBook: 12 tests passed, 239 alerts.
+- Reproduced on Douglas's MacBook: 12 tests passed, 239 alerts.
 - Review pack on seed 42: 239 raw alerts became 28 review items (17 Tier 1, 11 Tier 2),
   about 2 to 3 a month, plus 19 monthly self-approval summary lines. Every planted
   scheme still has a record in the pack. Exploratory only; see the draft evaluation plan.
