@@ -24,7 +24,7 @@ Choose a new output folder for each benchmark. Development mode exercises four k
 - `docs/evaluation-v0.5.md`: current protocol awaiting author approval. The older draft is historical.
 - [v0.5 development comparison](examples/protocol-v0.5-development/comparison.md): revised queue, supplier features and ranking tradeoffs.
 - `examples/development-benchmark/`: archived v0.4 development-only results, never evidence from a frozen experiment.
-- `docs/review-protocol-v0.1.md`: independent reviewer duties and the proposed human study.
+- `docs/review-protocol-v0.1.md`: independent reviewer duties, what to do when ten slots are full, and the proposed human study. Use the [blank follow-up register](docs/self-approval-register.csv) for deferred self-approvals.
 
 ## Formal benchmark (after public protocol freeze only)
 Publish the reviewed freeze commit and tag per the protocol. In a clean checkout of that tag, use `python -m fira.benchmark --formal --out ../FIRA-formal-results`. Keep output outside the source tree. The runner checks the local tag and tracked files; it cannot verify that the protocol was published. Preserve partial outputs and report failures. Do not replace development evidence with claims of measured time saved, avoided losses or verified real-world detection.

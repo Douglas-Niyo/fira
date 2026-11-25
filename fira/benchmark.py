@@ -19,7 +19,11 @@ def config(seed,size,p,enriched,stress):
     counts=np.ones(7,dtype=int) if enriched else rng.poisson(size*p/7/np.array([1,1,1,1,7.5,2.5,1]))
     return Config(seed=seed,intensity=size/600,stress=stress,**{"n_"+a:int(n) for a,n in zip(ATTR,counts)})
 
-def fsr(n,f,budget):
+# Severity is assigned by planted type for evaluation only, never by the alert
+# that happened to surface it. Unknown types require a protocol amendment.
+TYPE_WEIGHTS = {"T01": 1, "T02": 1, "T04": 2, "T05": 2, "T06": 2, "T09": 1, "T15": 2}
+
+def fsr(n,f,budget,weights=None):
     if not n:return np.nan
     vals=np.array(list(n.values()),float); target=min(budget,sum(vals));lo,hi=0.,max(vals)
     for _ in range(60):
@@ -27,7 +31,14 @@ def fsr(n,f,budget):
         if np.minimum(vals,mid).sum()<target:lo=mid
         else:hi=mid
     caps=np.minimum(vals,hi)
-    return float(np.mean(np.minimum([f.get(key,0) for key in n],caps)/caps))
+    credit=np.minimum([f.get(key,0) for key in n],caps)/caps
+    return float(np.average(credit,weights=[weights[t] for t in n]) if weights is not None else np.mean(credit))
+
+def tier_outcomes(n,f,budget):
+    urgent=[t for t in n if TYPE_WEIGHTS[t]==2]
+    return dict(tier_weighted_fsr=fsr(n,f,budget,TYPE_WEIGHTS),
+                tier1_schemes_found=sum(f.get(t,0) for t in urgent),
+                tier1_schemes_present=sum(n[t] for t in urgent))
 
 def scores(pay,month,relative=True):
     df=pay[pay.Payment_Date.str[:7]<=month].copy()
@@ -87,7 +98,7 @@ def one(seed,size,p,enriched,stress):
     base=dict(seed=seed,size=size,family="enriched" if enriched else "prevalence",target=0 if enriched else p,stress=stress,invoices=len(valid[I]),payments=paycount,
               realized=len(set(lab.loc[lab.table==P,"record_id"]))/max(1,paycount),schemes=len(typed),raw=raw,lines=lines,
               reduction=1-lines/raw if raw else None,pack_retention=len(found_pack)==len(typed),trace=set(a.alert_id)==set(links.alert_id))
-    base["full_found_by_type"]=json.dumps({t:sum(typed[j]==t for j in found_pack) for t in sorted(n)})
+    base["full_found_by_type"]=json.dumps({t:sum(typed[j]==t for j in found_pack) for t in sorted(n)},sort_keys=True)
     for k in (5,10,20):
         pressure=sum(sum(mm==m for mm,*_ in candidates)>k for m in months)/12
         for method in ("B0","B1","B2","B3","B3_min","B4"):
@@ -104,8 +115,9 @@ def one(seed,size,p,enriched,stress):
             for v,h in zip(selected,hits):
                 for j in h:first.setdefault(typed[j],v[0])
             out.append(dict(**base,k=k,method=method,pressure=pressure,tier1_fills_months=sum(sum(v[0]==m and v[2]==2 for v in candidates)>=k for m in months),tier1_read=sum(v[2]==2 for v in selected),tier2_read=sum(v[2]==4 for v in selected),summaries_read=sum(v[2]==6 for v in selected),available_summaries=len(summary),reviewed=len(selected),fsr=fsr(n,f,12*k),
+                 summaries_deferred=len(summary)-sum(v[2]==6 for v in selected),**tier_outcomes(n,f,12*k),
                  coverage=len(f)/len(n) if n else None,recall=len(found)/len(typed) if typed else None,
-                 precision=sum(bool(h) for h in hits)/len(hits) if hits else None,found_by_type=json.dumps(f),present_by_type=json.dumps(n),first_hit=json.dumps(first),linked_planted_payment_dollars=round(dollars,2)))
+                 precision=sum(bool(h) for h in hits)/len(hits) if hits else None,found_by_type=json.dumps(f,sort_keys=True),present_by_type=json.dumps(n,sort_keys=True),first_hit=json.dumps(first,sort_keys=True),linked_planted_payment_dollars=round(dollars,2)))
     return out
 
 def jobs():
@@ -136,7 +148,7 @@ def main():
 def paired_results(df):
     result=[]
     for keys,g in df[df.k==10].groupby(["size","family","target"]):
-        for metric in ["fsr","coverage"]:
+        for metric in ["fsr","coverage","tier_weighted_fsr"]:
             v=g.pivot(index="seed",columns="method",values=metric)
             for left,right in (("B3","B1"),("B4","B1"),("B3","B4"),("B3","B3_min")):
                 d=(v[left]-v[right]).dropna().to_numpy(dtype=float)

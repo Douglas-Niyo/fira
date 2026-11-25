@@ -46,6 +46,14 @@ For every item: reviewer, date, evidence examined, outcome (**cleared**, **corre
 **escalated**), and a short note. The record is kept with the monthly review pack and is
 itself available to the external auditor.
 
+### 1.5 When the ten slots are full (November 25 pre-freeze amendment)
+
+At month end, reconcile the full list of monthly user summaries to signed reviews. A summary inside the ten uses one slot; selection alone does not establish review. Assign each remaining summary to a named person who did not enter, approve or pay the transactions. The same independent board member may do the additional work if able. Include deferred summaries in the [separate register](self-approval-register.csv) with the month, user, assignee, due date, status, evidence reference, date completed, minutes and follow-up. Record the scope actually checked. Count no duplicate sign-off or extra benchmark detection.
+
+If nobody independent is available, record **outstanding — no independent reviewer**, notify the board chair and carry the entry to the next meeting. Do not mark it cleared. Report extra minutes separately from time on the ten selected items. If a pilot measures total operating time, add both once.
+
+**Walkthrough for an intended reviewer (not yet completed):** All ten slots are occupied and the clerk self-approved 16 invoices. Who can review the supporting detail independently? Where will the sign-off and time be recorded? What will the board see next month if the review remains open?
+
 ## Part 2. Reviewer study (planned; not started)
 
 ### 2.1 Purpose
@@ -85,4 +93,4 @@ important items.
 
 ## Decisions
 
-Reviewed and approved by the author, Douglas Niyonsingiza (November 21, 2026).
+Original November 21 protocol reviewed and approved by Douglas Niyonsingiza. Section 1.5 is a November 25 pre-freeze addition; no walkthrough result is claimed.
