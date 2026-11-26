@@ -14,3 +14,4 @@ One line per work session: date, hours, what was done, link to commit or file.
 | 2026-11-21 | 2.5 | Wrote "FIRA: My Review and Recommendations" (workload counting, prevalence design, budget pressure, attribution, target-organization wording, immigration assumptions); approved evaluation decisions | |
 | 2026-11-22 to 2026-11-23 | 5.0 | Prepared FIRA 0.2.0 monthly payment review release on branch fira-0.2.0-review: monthly snapshots, benchmark runner, evaluation protocol v0.4, development benchmark | |
 | 2026-11-24 | 2.5 | Revised benchmark ranking (summaries last, B4 rules diversity, supplier-relative features, B3_min); evaluation protocol v0.5; v0.5 development results and comparison | |
+| 2026-11-25 | 2.5 | Reproduced FIRA 0.2.0 in GitHub Codespaces on Python 3.12: 35 tests passed; demonstration and v0.5 development benchmark matched published outputs; Python 3.14 crashed (segmentation fault) with pinned libraries | |
